@@ -32,7 +32,39 @@ class IndexArticle(Resource):
     def get(self):
         articles = [article.to_dict() for article in Article.query.all()]
         return articles, 200
+class Login(Resource):
 
+    def post(self):
+        
+        username = request.get_json()['username']
+        user = User.query.filter(User.username == username).first()
+
+        session['user_id'] = user.id
+
+        return user.to_dict(), 200
+
+class Logout(Resource):
+
+    def delete(self):
+
+        session['user_id'] = None
+        
+        return {}, 204
+
+class CheckSession(Resource):
+
+    def get(self):
+        
+        user_id = session.get('user_id')
+        if user_id:
+            user = User.query.filter(User.id == user_id).first()
+            return user.to_dict(), 200
+        
+        return {}, 401
+
+api.add_resource(Login, '/login')
+api.add_resource(Logout, '/logout')
+api.add_resource(CheckSession, '/check_session')
 class ShowArticle(Resource):
 
     def get(self, id):
